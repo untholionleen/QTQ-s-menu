@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>情侣私房菜单点单系统</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei"}
+:root{--main:#ff7979;--light:#fff1f1;--gray:#888}
+body{background:#f8f8f8;color:#333;min-height:100vh}
+.container{max-width:900px;margin:0 auto;padding:20px}
+.card{background:#fff;border-radius:14px;padding:22px;margin:16px 0;box-shadow:0 2px 12px #00000010}
+.btn{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-size:15px;margin:4px}
+.btn-primary{background:var(--main);color:#fff}
+.btn-gray{background:#ddd;color:#333}
+input,textarea{width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin:8px 0;font-size:15px}
+.hidden{display:none!important}
+.nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.dish-item{padding:12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+#qrcanvas{margin:12px auto;display:block}
+</style>
+</head>
+<body>
+<div class="container">
+<div id="loginPage" class="card">
+<h2>管理员登录（菜单后台）</h2>
+<input placeholder="账号" id="usr">
+<input placeholder="密码" id="pwd" type="password">
+<button class="btn btn-primary" onclick="login()">登录后台</button>
+<p style="margin-top:10px;color:var(--gray)">默认账号：admin｜密码：menu2026</p>
+<br>
+<a href="#/order">👉访客点菜入口（无需登录）</a>
+</div>
+
+<div id="adminPage" class="hidden">
+<div class="nav">
+<button class="btn btn-primary" onclick="showAddDish()">新增菜品</button>
+<button class="btn btn-gray" onclick="genShare()">生成点菜分享链接&二维码</button>
+<button class="btn btn-gray" onclick="logout()">退出登录</button>
+</div>
+<div class="card">
+<h3>我的餐厅菜品库</h3>
+<div id="dishList"></div>
+</div>
+<div class="card hidden" id="addForm">
+<h3>添加菜品</h3>
+<input placeholder="菜品名称" id="dname">
+<input placeholder="价格" id="dprice">
+<textarea placeholder="菜品备注" id="dnote"></textarea>
+<button class="btn btn-primary" onclick="saveDish()">保存菜品</button>
+<button class="btn btn-gray" onclick="closeAdd()">取消</button>
+</div>
+<div class="card">
+<h3>点菜分享二维码</h3>
+<canvas id="qrcanvas"></canvas>
+<p>点菜链接：<span id="shareLink"></span></p>
+<button class="btn btn-primary" onclick="copyLink()">复制链接</button>
+</div>
+</div>
+
+<div id="orderPage" class="hidden">
+<div class="card">
+<h2>在线点菜（访客端）</h2>
+<div id="visitDishList"></div>
+</div>
+<div class="card">
+<h3>已选菜品</h3>
+<div id="cartBox"></div>
+<button class="btn btn-primary" onclick="submitOrder()">确认下单（订单发送邮件）</button>
+</div>
+</div>
+</div>
+
+<script>
+// ============ 【请部署后修改这里！EmailJS配置】============
+// 去 emailjs.com 注册账号，替换下面三个值
+const EMAIL_SERVICE_ID = "YOUR_SERVICE_ID";
+const EMAIL_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+const EMAIL_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+emailjs.init(EMAIL_PUBLIC_KEY);
+
+// 默认管理员账号，存储本地
+const defaultUser = {username:"admin",password:"menu2026"};
+
+// 路由判断
+let currentUser = JSON.parse(localStorage.getItem("menuAdmin"))||null;
+let dishData = JSON.parse(localStorage.getItem("dishStore"))||[];
+let cart = [];
+
+// 路由分发
+function route(){
+  let hash = location.hash;
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("adminPage").classList.add("hidden");
+  document.getElementById("orderPage").classList.add("hidden");
+  if(hash === "#/order"){
+    document.getElementById("orderPage").classList.remove("hidden");
+    renderVisitDish();
+  }else{
+    if(currentUser){
+      document.getElementById("adminPage").classList.remove("hidden");
+      renderDish();
+    }else{
+      document.getElementById("loginPage").classList.remove("hidden");
+    }
+  }
+}
+
+// 登录逻辑
+function login(){
+  let u = document.getElementById("usr").value.trim();
+  let p = document.getElementById("pwd").value.trim();
+  if(u===defaultUser.username && p===defaultUser.password){
+    localStorage.setItem("menuAdmin",JSON.stringify(defaultUser));
+    currentUser = defaultUser;
+    route();
+  }else{
+    alert("账号密码错误");
+  }
+}
+function logout(){
+  localStorage.removeItem("menuAdmin");
+  currentUser = null;
+  location.hash = "";
+  route();
+}
+
+// 菜品后台管理
+function renderDish(){
+  let html = "";
+  dishData.forEach((item,idx)=>{
+    html += `<div class="dish-item">
+    <div>${item.name}｜¥${item.price}｜${item.note}</div>
+    <button class="btn btn-gray" onclick="delDish(${idx})">删除</button>
+    </div>`
+  })
+  document.getElementById("dishList").innerHTML = html||"<p>暂无菜品，请新增</p>";
+}
+function showAddDish(){document.getElementById("addForm").classList.remove("hidden")}
+function closeAdd(){document.getElementById("addForm").classList.add("hidden")}
+function saveDish(){
+  let name = document.getElementById("dname").value.trim();
+  let price = document.getElementById("dprice").value.trim();
+  let note = document.getElementById("dnote").value.trim();
+  if(!name){alert("菜品名称不能为空");return;}
+  dishData.push({name,price,note});
+  localStorage.setItem("dishStore",JSON.stringify(dishData));
+  closeAdd();renderDish();
+  document.getElementById("dname").value="";
+  document.getElementById("dprice").value="";
+  document.getElementById("dnote").value="";
+}
+function delDish(i){
+  dishData.splice(i,1);
+  localStorage.setItem("dishStore",JSON.stringify(dishData));
+  renderDish();
+}
+
+// 访客点菜渲染
+function renderVisitDish(){
+  let html = "";
+  dishData.forEach((item,idx)=>{
+    html += `<div class="dish-item">
+    <div>${item.name}｜¥${item.price}｜${item.note}</div>
+    <button class="btn btn-primary" onclick="addCart(${idx})">加入订单</button>
+    </div>`
+  })
+  document.getElementById("visitDishList").innerHTML = html||"<p>商家暂未添加菜品</p>";
+  renderCart();
+}
+function addCart(idx){
+  cart.push(dishData[idx]);
+  renderCart();
+}
+function renderCart(){
+  let html = "";
+  cart.forEach((it,i)=>{
+    html += `<div class="dish-item">${it.name} ¥${it.price}<button class="btn btn-gray" onclick="cart.splice(${i});renderCart()">移除</button></div>`
+  })
+  document.getElementById("cartBox").innerHTML = html||"<p>暂未选择菜品</p>";
+}
+
+// 生成分享链接+二维码
+function genShare(){
+  let domain = window.location.origin;
+  let shareUrl = domain + "/#/order";
+  document.getElementById("shareLink").innerText = shareUrl;
+  QRCode.toCanvas(document.getElementById("qrcanvas"),shareUrl,{width:240});
+}
+function copyLink(){
+  let txt = document.getElementById("shareLink").innerText;
+  navigator.clipboard.writeText(txt).then(()=>alert("链接已复制，可以生成二维码发给对象"));
+}
+
+// 下单发送邮件（EmailJS）
+function submitOrder(){
+  if(cart.length===0){alert("请至少选择一道菜品");return;}
+  let orderText = cart.map(x=>`${x.name} ￥${x.price} 备注：${x.note}`).join("\n");
+  let sendData = {
+    order_content: orderText,
+    site_domain: window.location.origin
+  }
+  emailjs.send(EMAIL_SERVICE_ID,EMAIL_TEMPLATE_ID,sendData)
+  .then(res=>{
+    alert("下单成功！订单邮件已发送");
+    cart = [];renderCart();
+  },err=>{
+    alert("邮件发送失败，请检查EmailJS密钥配置");
+    console.log(err);
+  })
+}
+
+window.onhashchange = route;
+route();
+</script>
+</body>
+</html>
