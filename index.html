@@ -1,379 +1,70 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>情侣私房菜单点单系统</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<style>
-/* ===================== 【修改此处：全局字体设置】 =====================
-font-family 直接改成你想要字体，示例：
-"PingFang SC","Microsoft Yahei","圆体","卡通体"
-网上web字体引入我会标注在哪里添加
-*/
-:root{
-    --main:#ff8696;
-    --light:#fff3f5;
-    --light2:#ffe4e8;
-    --gray:#777777;
-    --card-radius:18px;
-    --font-family:"Microsoft Yahei",system-ui,-apple-system,sans-serif;
-}
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:var(--font-family);
-}
-body{
-    background:var(--light);
-    color:#333;
-    min-height:100vh;
-    padding-bottom:40px;
-}
-.container{
-    max-width:960px;
-    margin:0 auto;
-    padding:22px 16px;
-}
-.card{
-    background:#ffffff;
-    border-radius:var(--card-radius);
-    padding:26px;
-    margin:20px 0;
-    box-shadow:0 4px 14px rgba(255,134,150,0.12);
-}
-.btn{
-    padding:11px 20px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:15px;
-    margin:5px;
-    transition:0.2s ease;
-}
-.btn:hover{
-    transform:translateY(-1px);
-}
-.btn-primary{
-    background:var(--main);
-    color:#fff;
-}
-.btn-gray{
-    background:#eeeeee;
-    color:#333;
-}
-input,textarea{
-    width:100%;
-    padding:12px;
-    border:1px solid #f0d8dd;
-    border-radius:12px;
-    margin:9px 0;
-    font-size:15px;
-    background:#fff;
-}
-.hidden{display:none !important;}
-.nav{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
-}
-.dish-item{
-    padding:14px 10px;
-    border-bottom:1px solid #f6e4e8;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-}
-.dish-img-small{
-    width:64px;
-    height:64px;
-    object-fit:cover;
-    border-radius:10px;
-    background:#f8e8ec;
-}
-/* ===================== 【修改此处：页面顶部装饰横幅图片】 =====================
-把下面background-image里引号内链接替换成你的图片url即可
-*/
-.banner-deco{
-    width:100%;
-    height:160px;
-    border-radius:var(--card-radius);
-    background-image:url("");
-    background-size:cover;
-    background-position:center;
-    margin-bottom:20px;
-}
-#qrcanvas{
-    margin:16px auto;
-    display:block;
-    background:white;
-    padding:12px;
-    border-radius:14px;
-}
-.tip-text{
-    font-size:13px;
-    color:var(--gray);
-    margin:8px 0;
-}
-.batch-textarea{
-    min-height:140px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吴兆宇的数字聚合空间</title>
+    <!-- 引入Google字体，提升质感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans SC', sans-serif; }
+        body { background-color: #f4f7f6; color: #333; line-height: 1.6; }
+        header { background: #2c3e50; color: #fff; padding: 20px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .nav-list { display: flex; list-style: none; }
+        .nav-list li a { color: #bdc3c7; text-decoration: none; padding: 10px 15px; cursor: pointer; transition: 0.3s; }
+        .nav-list li a:hover, .nav-list li a.active { color: #fff; background: #34495e; border-radius: 5px; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 60vh; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #3498db; color: #fff; text-decoration: none; border-radius: 6px; margin: 5px; transition: 0.3s; }
+        .btn:hover { background: #2980b9; }
+        .page-content { display: none; }
+        .page-content.show { display: block; }
+        footer { text-align: center; padding: 40px; color: #7f8c8d; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
+
+<header>
+    <div class="nav-container">
+        <h2>吴兆宇的数字空间</h2>
+        <ul class="nav-list">
+            <li><a class="nav-link active" data-target="home">主页</a></li>
+            <li><a class="nav-link" data-target="library">图书馆</a></li>
+            <li><a class="nav-link" data-target="culture">文化</a></li>
+            <li><a class="nav-link" data-target="edu">教育</a></li>
+            <li><a class="nav-link" data-target="game">娱乐</a></li>
+        </ul>
+    </div>
+</header>
+
 <div class="container">
-
-<!-- ===================== 【修改此处：顶部装饰图区域，上面css改链接即可生效】 ===================== -->
-<div class="banner-deco"></div>
-
-<div id="loginPage" class="card">
-<h2 style="text-align:center;">管理员登录 · 私房菜单后台</h2>
-<p class="tip-text" style="text-align:center;">仅管理端需要登录，扫码点菜访客无需账号</p>
-<input placeholder="管理员账号" id="usr">
-<input placeholder="管理员密码" id="pwd" type="password">
-<button class="btn btn-primary" style="width:100%;" onclick="login()">进入后台管理</button>
-<p style="margin-top:12px;color:var(--gray);text-align:center;">默认账号：admin｜密码：menu2026</p>
-<br>
-<div style="text-align:center;">
-<a href="#/order">👉访客点菜入口（直接分享给对象）</a>
-</div>
-</div>
-
-<div id="adminPage" class="hidden">
-<div class="nav">
-<button class="btn btn-primary" onclick="showAddDish()">单条新增菜品</button>
-<button class="btn btn-primary" onclick="showBatchAdd()">快速批量录入模式</button>
-<button class="btn btn-gray" onclick="genShare()">生成点菜链接&二维码</button>
-<button class="btn btn-gray" onclick="logout()">退出登录</button>
-</div>
-
-<div class="card">
-<h3>我的菜品库</h3>
-<div id="dishList"></div>
-</div>
-
-<!-- 单条新增菜品表单（新增图片URL输入框） -->
-<div class="card hidden" id="addForm">
-<h3>单条添加菜品</h3>
-<input placeholder="菜品名称" id="dname">
-<input placeholder="菜品价格" id="dprice">
-<input placeholder="菜品图片链接【粘贴图片网址，留空则不显示图片】" id="dimg">
-<textarea placeholder="菜品简短备注" id="dnote"></textarea>
-<button class="btn btn-primary" onclick="saveDish()">保存菜品</button>
-<button class="btn btn-gray" onclick="closeAdd()">取消</button>
-</div>
-
-<!-- 快速批量录入模式 -->
-<div class="card hidden" id="batchForm">
-<h3>快速批量录入菜品</h3>
-<p class="tip-text">格式：菜品名称|价格|图片链接|备注，一行一道菜<br>图片链接为空直接写两个竖线隔开，例：草莓奶冻|18||甜甜的草莓冻</p>
-<textarea class="batch-textarea" id="batchInput" placeholder="草莓奶冻|18|https://xxx.jpg|甜甜的草莓冻
-焦糖布丁|16||"></textarea>
-<button class="btn btn-primary" onclick="batchSave()">批量导入</button>
-<button class="btn btn-gray" onclick="closeBatchAdd()">取消</button>
-</div>
-
-<div class="card">
-<h3>点菜分享二维码</h3>
-<canvas id="qrcanvas"></canvas>
-<p>点菜链接：<span id="shareLink"></span></p>
-<button class="btn btn-primary" onclick="copyLink()">复制分享链接</button>
-<p class="tip-text">把链接/二维码发给对方即可直接点菜，无需登录</p>
-</div>
-</div>
-
-<div id="orderPage" class="hidden">
-<div class="card">
-<h2 style="text-align:center;">在线点菜 🥰</h2>
-<div id="visitDishList"></div>
-</div>
-<div class="card">
-<h3>已选菜品</h3>
-<div id="cartBox"></div>
-<button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="submitOrder()">确认下单，发送订单邮件</button>
-</div>
-</div>
-
+    <!-- 主页 -->
+    <div id="home" class="page-content show">
+        <div class="card">
+            <h1>欢迎来到我的数字港湾</h1>
+            <p style="margin:20px 0;">这里汇集了我一生积淀的书香与文化。请通过导航栏选择您想前往的板块。</p>
+            <img src="https://images.unsplash.com/photo-1497633762265-9d176840742d?w=800" style="width:100%; border-radius:10px;">
+        </div>
+    </div>
+    
+    <!-- 其余板块结构与JS切换逻辑同上，您只需在下方对应的div中填充文字即可 -->
+    <div id="library" class="page-content"><div class="card"><h2>图书馆</h2><a href="https://ullibrary.mysxl.cn/" class="btn" target="_blank">访问图书馆</a></div></div>
+    <div id="culture" class="page-content"><div class="card"><h2>文化</h2><a href="https://yanzicai.mysxl.cn/" class="btn" target="_blank">访问文化馆</a></div></div>
+    <div id="edu" class="page-content"><div class="card"><h2>教育</h2><p>教学资料整理中...</p><a href="./myfile.pdf" download class="btn">下载课件</a></div></div>
+    <div id="game" class="page-content"><div class="card"><h2>娱乐</h2><a href="https://xymusicjerryhoz.mysxl.cn/" class="btn" target="_blank">访问音乐空间</a></div></div>
 </div>
 
 <script>
-// ============ 【部署完成之后修改这里！EmailJS配置】============
-const EMAIL_SERVICE_ID = "YOUR_SERVICE_ID";
-const EMAIL_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
-const EMAIL_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
-emailjs.init(EMAIL_PUBLIC_KEY);
-
-const defaultUser = {username:"admin",password:"menu2026"};
-
-let currentUser = JSON.parse(localStorage.getItem("menuAdmin"))||null;
-let dishData = JSON.parse(localStorage.getItem("dishStore"))||[];
-let cart = [];
-
-// 路由分发
-function route(){
-  let hash = location.hash;
-  document.getElementById("loginPage").classList.add("hidden");
-  document.getElementById("adminPage").classList.add("hidden");
-  document.getElementById("orderPage").classList.add("hidden");
-  if(hash === "#/order"){
-    document.getElementById("orderPage").classList.remove("hidden");
-    renderVisitDish();
-  }else{
-    if(currentUser){
-      document.getElementById("adminPage").classList.remove("hidden");
-      renderDish();
-    }else{
-      document.getElementById("loginPage").classList.remove("hidden");
-    }
-  }
-}
-
-// 登录登出
-function login(){
-  let u = document.getElementById("usr").value.trim();
-  let p = document.getElementById("pwd").value.trim();
-  if(u===defaultUser.username && p===defaultUser.password){
-    localStorage.setItem("menuAdmin",JSON.stringify(defaultUser));
-    currentUser = defaultUser;
-    route();
-  }else{
-    alert("账号或者密码不正确");
-  }
-}
-function logout(){
-  localStorage.removeItem("menuAdmin");
-  currentUser = null;
-  location.hash = "";
-  route();
-}
-
-// 后台菜品渲染（带缩略图）
-function renderDish(){
-  let html = "";
-  dishData.forEach((item,idx)=>{
-    let imgHtml = item.img ? `<img class="dish-img-small" src="${item.img}">` : `<div class="dish-img-small"></div>`;
-    html += `<div class="dish-item">
-    ${imgHtml}
-    <div>${item.name}｜¥${item.price}｜${item.note||"无备注"}</div>
-    <button class="btn btn-gray" onclick="delDish(${idx})">删除</button>
-    </div>`
-  })
-  document.getElementById("dishList").innerHTML = html||"<p>暂无菜品，请添加菜品</p>";
-}
-
-// 单条添加
-function showAddDish(){document.getElementById("addForm").classList.remove("hidden")}
-function closeAdd(){document.getElementById("addForm").classList.add("hidden")}
-function saveDish(){
-  let name = document.getElementById("dname").value.trim();
-  let price = document.getElementById("dprice").value.trim();
-  let img = document.getElementById("dimg").value.trim();
-  let note = document.getElementById("dnote").value.trim();
-  if(!name){alert("菜品名称不能为空");return;}
-  dishData.push({name,price,img,note});
-  localStorage.setItem("dishStore",JSON.stringify(dishData));
-  closeAdd();
-  renderDish();
-  document.getElementById("dname").value="";
-  document.getElementById("dprice").value="";
-  document.getElementById("dimg").value="";
-  document.getElementById("dnote").value="";
-}
-function delDish(i){
-  dishData.splice(i,1);
-  localStorage.setItem("dishStore",JSON.stringify(dishData));
-  renderDish();
-}
-
-// 快速批量模式
-function showBatchAdd(){document.getElementById("batchForm").classList.remove("hidden")}
-function closeBatchAdd(){document.getElementById("batchForm").classList.add("hidden")}
-function batchSave(){
-  let text = document.getElementById("batchInput").value.trim();
-  if(!text){alert("请输入批量菜品");return;}
-  let lines = text.split("\n");
-  let count = 0;
-  lines.forEach(line=>{
-    line = line.trim();
-    if(!line) return;
-    let arr = line.split("|");
-    dishData.push({
-      name:(arr[0]||"").trim(),
-      price:(arr[1]||"").trim(),
-      img:(arr[2]||"").trim(),
-      note:(arr[3]||"").trim()
-    })
-    count++;
-  })
-  localStorage.setItem("dishStore",JSON.stringify(dishData));
-  closeBatchAdd();
-  renderDish();
-  alert(`成功导入 ${count} 条菜品`);
-  document.getElementById("batchInput").value="";
-}
-
-// 访客点菜页面渲染（展示菜品图片）
-function renderVisitDish(){
-  let html = "";
-  dishData.forEach((item,idx)=>{
-    let imgHtml = item.img ? `<img class="dish-img-small" src="${item.img}">` : `<div class="dish-img-small"></div>`;
-    html += `<div class="dish-item">
-    ${imgHtml}
-    <div>${item.name}｜¥${item.price}<br><small style="color:#999;">${item.note||""}</small></div>
-    <button class="btn btn-primary" onclick="addCart(${idx})">加入订单</button>
-    </div>`
-  })
-  document.getElementById("visitDishList").innerHTML = html||"<p>商家还没有添加菜品哦</p>";
-  renderCart();
-}
-function addCart(idx){
-  cart.push(dishData[idx]);
-  renderCart();
-}
-function renderCart(){
-  let html = "";
-  cart.forEach((it,i)=>{
-    html += `<div class="dish-item">${it.name} ¥${it.price}<button class="btn btn-gray" onclick="cart.splice(${i});renderCart()">移除</button></div>`
-  })
-  document.getElementById("cartBox").innerHTML = html||"<p>暂时没有选中菜品</p>";
-}
-
-// 分享二维码链接
-function genShare(){
-  let domain = window.location.origin;
-  let shareUrl = domain + "/#/order";
-  document.getElementById("shareLink").innerText = shareUrl;
-  QRCode.toCanvas(document.getElementById("qrcanvas"),shareUrl,{width:260});
-}
-function copyLink(){
-  let txt = document.getElementById("shareLink").innerText;
-  navigator.clipboard.writeText(txt).then(()=>alert("分享链接复制完成"));
-}
-
-// 下单发送邮件
-function submitOrder(){
-  if(cart.length===0){alert("至少选择一道菜品");return;}
-  let orderText = cart.map(x=>`${x.name} ￥${x.price} 备注：${x.note||"无"}`).join("\n");
-  let sendData = {
-    order_content: orderText,
-    site_domain: window.location.origin
-  }
-  emailjs.send(EMAIL_SERVICE_ID,EMAIL_TEMPLATE_ID,sendData)
-  .then(res=>{
-    alert("下单成功！订单邮件已发送");
-    cart = [];renderCart();
-  },err=>{
-    alert("邮件发送失败，请核对EmailJS密钥");
-    console.log(err);
-  })
-}
-
-window.onhashchange = route;
-route();
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('show'));
+            this.classList.add('active');
+            document.getElementById(this.dataset.target).classList.add('show');
+        });
+    });
 </script>
 </body>
 </html>
