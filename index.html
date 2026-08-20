@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>情侣私房点餐平台</title>
-    <!-- 样式和发邮件工具库 -->
+    <title>山支大师的御膳房</title>
+    <!-- 引入美化样式库 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入免费发邮件的核心工具 -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
@@ -14,24 +15,25 @@
         .exam-card { border-radius: 1rem; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08); background: #ffffff; border: 1px solid #e2e8f0; }
         .primary-btn { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border-radius: 9999px; font-weight: 700; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
         .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); }
-        .green-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 9999px; font-weight:700; }
-        .red-btn { background:#ef4444; color:white; border-radius:9999px; }
+        .green-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 9999px; font-weight: 700; }
+        .red-btn { background: #ef4444; color: white; border-radius: 9999px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-    <!-- 顶部导航 -->
+    <!-- 顶部导航栏 -->
     <header class="bg-slate-900 text-white sticky top-0 z-50 px-6 py-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
             <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow">
                 <i class="fa-solid fa-utensils text-base"></i>
             </div>
             <div>
-                <h1 class="font-bold text-sm tracking-wide">情侣私房点餐管理平台</h1>
-                <p class="text-[10px] text-slate-400">奶奶的专属小厨房 · 下单自动邮箱通知</p>
+                <h1 class="font-bold text-sm tracking-wide">山支大师的御膳房</h1>
+                <p class="text-[10px] text-slate-400">专属私房菜单管理 · 下单自动邮箱通知</p>
             </div>
         </div>
         <div id="nav-user-info" class="hidden flex items-center space-x-4">
-            <span id="display-current-user" class="text-xs text-slate-300 font-medium">店主</span>
+            <span id="display-role" class="px-3 py-1 bg-slate-800 text-blue-400 rounded-md text-xs font-bold border border-slate-700">御厨掌柜</span>
+            <span id="display-current-user" class="text-xs text-slate-300 font-medium">登录用户</span>
             <button onclick="logout()" class="text-xs text-slate-400 hover:text-white font-medium transition"><i class="fa-solid fa-power-off mr-1"></i>退出登录</button>
         </div>
     </header>
@@ -40,130 +42,153 @@
         <!-- 登录模块 -->
         <section id="auth-section" class="max-w-md mx-auto w-full exam-card p-8 space-y-6">
             <div class="text-center">
-                <h2 class="text-xl font-bold text-slate-800">店主登录</h2>
-                <p class="text-xs text-slate-500 mt-1">输入您的名字和接收邮件的QQ邮箱</p>
+                <h2 class="text-xl font-bold text-slate-800">欢迎来到山支大师的御膳房</h2>
+                <p class="text-xs text-slate-500 mt-1">输入您的名字和接收订单的邮箱，开启私房点餐</p>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">您的昵称</label>
-                <input type="text" id="shop-owner-name" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 text-xs bg-slate-50" placeholder="例如：奶奶">
+                <label class="block text-xs font-bold text-slate-700 mb-1">掌柜昵称</label>
+                <input type="text" id="shop-owner-name" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 text-xs bg-slate-50" placeholder="例如：山支大师">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">接收订单的邮箱（QQ或163）</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">接收订单通知的邮箱（推荐QQ邮箱）</label>
                 <input type="email" id="owner-email" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 text-xs bg-slate-50" placeholder="你的QQ号@qq.com">
             </div>
-            <button onclick="loginShop()" class="w-full py-3 primary-btn text-xs">进入点餐管理系统</button>
+            <button onclick="loginShop()" class="w-full py-3 primary-btn text-xs">进入御膳房管理后台</button>
         </section>
 
-        <!-- 后台主面板 -->
+        <!-- 御膳房后台主页 -->
         <section id="shop-dashboard" class="hidden space-y-6">
+            <!-- 顶部功能切换栏 -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
-                <button onclick="switchModule('restaurant')" id="mod-rest" class="py-2.5 px-3 rounded-lg text-xs font-bold bg-blue-600 text-white transition">餐厅管理</button>
-                <button onclick="switchModule('dish')" id="mod-dish" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition">菜品编辑</button>
-                <button onclick="switchModule('cart')" id="mod-cart" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition">点餐台</button>
-                <button onclick="switchModule('order')" id="mod-order" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition">订单记录</button>
+                <button onclick="switchModule('restaurant')" id="mod-rest" class="py-2.5 px-3 rounded-lg text-xs font-bold bg-blue-600 text-white transition"><i class="fa-solid fa-store mr-1"></i>御膳房分店</button>
+                <button onclick="switchModule('dish')" id="mod-dish" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition"><i class="fa-solid fa-bowl-food mr-1"></i>皇家菜单编辑</button>
+                <button onclick="switchModule('cart')" id="mod-cart" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition"><i class="fa-solid fa-cart-shopping mr-1"></i>贵宾点餐台</button>
+                <button onclick="switchModule('order')" id="mod-order" class="py-2.5 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition"><i class="fa-solid fa-file-invoice mr-1"></i>圣旨订单记录</button>
             </div>
 
-            <!-- 1. 餐厅管理 -->
-            <div id="panel-restaurant" class="exam-card p-6 space-y-5">
-                <h3 class="text-base font-bold text-slate-800">🏠 创建专属餐厅</h3>
-                <div class="flex gap-2">
-                    <input id="rest-name" class="flex-1 px-3 py-2 rounded border text-xs bg-slate-50" placeholder="例如：长寿爱心小炒">
-                    <button onclick="createRestaurant()" class="px-4 py-2 primary-btn text-xs">新建餐厅</button>
-                </div>
-                <div id="rest-list" class="space-y-3 mt-4 text-xs text-slate-500">暂无餐厅</div>
-            </div>
-
-            <!-- 2. 菜品编辑 -->
-            <div id="panel-dish" class="exam-card p-6 space-y-5 hidden">
-                <h3 class="text-base font-bold text-slate-800">🍱 菜单管理</h3>
-                <div class="space-y-4 pt-2">
+            <!-- 模块1：餐厅/分店管理 -->
+            <div id="panel-restaurant" class="exam-card p-6 md:p-8 space-y-5">
+                <h3 class="text-base font-bold text-slate-800">🏠 创建您的御膳房主题</h3>
+                <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label class="text-xs font-bold">选择餐厅</label>
-                        <select id="dish-rest-select" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mt-1"></select>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">御膳房名称</label>
+                        <input id="rest-name" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" placeholder="例如：山支大师深夜小食堂">
+                    </div>
+                    <button onclick="createRestaurant()" class="self-end px-4 py-2 primary-btn text-xs">新建御膳房主题</button>
+                </div>
+                <div id="rest-list" class="space-y-3 mt-4">
+                    <p class="text-xs text-slate-500">暂无主题，点击上方新建</p>
+                </div>
+            </div>
+
+            <!-- 模块2：菜品编辑 -->
+            <div id="panel-dish" class="exam-card p-6 md:p-8 space-y-5 hidden">
+                <h3 class="text-base font-bold text-slate-800">🍱 皇家菜单菜品管理</h3>
+                <div class="flex bg-slate-100 p-1 rounded-lg w-fit">
+                    <button onclick="switchDishMode('single')" id="mode-single" class="py-2 px-4 text-xs font-bold rounded-md bg-white text-blue-600 shadow-sm">单品添加</button>
+                    <button onclick="switchDishMode('batch')" id="mode-batch" class="py-2 px-4 text-xs font-bold rounded-md text-slate-600">批量导入菜单</button>
+                </div>
+                <!-- 单条添加表单 -->
+                <div id="form-single" class="space-y-4 pt-3">
+                    <div>
+                        <label class="text-xs font-bold">选择御膳房主题</label>
+                        <select id="dish-rest-select" class="w-full px-3 py-2 rounded border text-xs bg-slate-50"></select>
                     </div>
                     <div class="grid md:grid-cols-2 gap-3">
                         <div>
-                            <label class="text-xs font-bold">菜名</label>
-                            <input id="dish-name" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mt-1" placeholder="红烧肉">
+                            <label class="text-xs font-bold">菜品名称</label>
+                            <input id="dish-name" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" placeholder="秘制可乐鸡翅">
                         </div>
                         <div>
                             <label class="text-xs font-bold">价格（元）</label>
-                            <input id="dish-price" type="number" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mt-1" placeholder="38">
+                            <input id="dish-price" type="number" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" placeholder="28">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs font-bold">菜品介绍</label>
-                        <input id="dish-desc" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mt-1" placeholder="肥而不腻，软烂香甜">
+                        <label class="text-xs font-bold">菜品描述</label>
+                        <textarea id="dish-desc" rows="2" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" placeholder="选用上等鸡翅，小火慢炖，甜咸适口"></textarea>
                     </div>
-                    <button onclick="addSingleDish()" class="px-4 py-2 primary-btn text-xs">添加这道菜</button>
+                    <button onclick="addSingleDish()" class="px-4 py-2 primary-btn text-xs">把菜品加入菜单</button>
+                </div>
+                <!-- 批量导入表单 -->
+                <div id="form-batch" class="space-y-4 pt-3 hidden">
+                    <p class="text-xs text-slate-500">格式说明：菜名,价格,简介（中间用英文逗号隔开，一行写一道菜）</p>
+                    <select id="batch-rest-select" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mb-2"></select>
+                    <textarea id="batch-text" rows="5" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" placeholder="番茄炒蛋,22,酸甜可口下饭神器
+红烧肉,45,肥而不腻入口即化"></textarea>
+                    <button onclick="batchAddDish()" class="px-4 py-2 primary-btn text-xs">一键批量导入</button>
                 </div>
                 <div class="mt-4 border-t pt-4">
-                    <h4 class="text-xs font-bold text-slate-700">已添加的菜品：</h4>
+                    <h4 class="text-sm font-bold">当前菜单总览</h4>
                     <div id="dish-list" class="mt-2 text-xs text-slate-500">暂无菜品</div>
                 </div>
             </div>
 
-            <!-- 3. 点餐台 -->
-            <div id="panel-cart" class="exam-card p-6 space-y-5 hidden">
-                <h3 class="text-base font-bold text-slate-800">🛒 点餐下单页面</h3>
+            <!-- 模块3：点餐购物车 -->
+            <div id="panel-cart" class="exam-card p-6 md:p-8 space-y-5 hidden">
+                <h3 class="text-base font-bold text-slate-800">🛒 贵宾点餐台（分享给另一半点餐）</h3>
                 <div>
-                    <label class="text-xs font-bold">选择点餐餐厅</label>
-                    <select id="cart-rest-select" onchange="renderCartDish()" class="w-full px-3 py-2 rounded border text-xs bg-slate-50 mt-1"></select>
+                    <label class="text-xs font-bold">选择要点餐的御膳房主题</label>
+                    <select id="cart-rest-select" class="w-full px-3 py-2 rounded border text-xs bg-slate-50" onchange="renderCartDish()"></select>
                 </div>
                 <div id="cart-dish-box" class="grid md:grid-cols-3 gap-3 mt-3"></div>
                 <div class="border-t pt-4 mt-4">
-                    <h4 class="font-bold text-xs">购物车清单</h4>
-                    <div id="cart-list" class="text-xs mt-2 text-slate-500">购物车是空的</div>
-                    <div class="flex justify-between items-center mt-4 bg-slate-50 p-3 rounded-lg">
-                        <span class="font-bold text-sm">总计：¥<span id="total-price">0</span></span>
-                        <button onclick="submitOrder()" class="px-5 py-2 green-btn text-xs">提交订单并自动发邮件通知</button>
+                    <h4 class="font-bold text-sm">已选御膳购物车</h4>
+                    <div id="cart-list" class="text-xs mt-2">购物车空空如也</div>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="font-bold">总计：¥<span id="total-price">0</span></span>
+                        <button onclick="submitOrder()" class="px-5 py-2 green-btn text-xs">呈递圣旨（下单并自动发邮件通知您）</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. 历史订单 -->
-            <div id="panel-order" class="exam-card p-6 space-y-5 hidden">
-                <h3 class="text-base font-bold text-slate-800">📋 历史订单记录</h3>
-                <div id="order-list" class="text-xs space-y-3 text-slate-500">暂无订单</div>
+            <!-- 模块4：历史订单 -->
+            <div id="panel-order" class="exam-card p-6 md:p-8 space-y-5 hidden">
+                <h3 class="text-base font-bold text-slate-800">📋 圣旨订单记录（全部历史）</h3>
+                <div id="order-list" class="text-xs space-y-3"></div>
             </div>
         </section>
     </main>
 
+    <footer class="text-center py-6 text-xs text-slate-400">
+        Copyright © 2026 山支大师的御膳房 | 订单自动邮件通知系统
+    </footer>
+
     <script>
-        // ====================== 填写您的邮件密钥 ======================
+        // ====================== 【请在这里填入您的 EmailJS 密钥】 ======================
         const EMAILJS_USER_ID = "替换成你的userID";
         const EMAILJS_SERVICE_ID = "替换成你的serviceID";
         const EMAILJS_TEMPLATE_ID = "替换成你的templateID";
 
         let shopUser = { name: "", email: "" };
-        let restList = JSON.parse(localStorage.getItem("restData")) || [];
-        let dishList = JSON.parse(localStorage.getItem("dishData")) || [];
-        let orderList = JSON.parse(localStorage.getItem("orderData")) || [];
+        let restList = JSON.parse(localStorage.getItem("restData_sz")) || [];
+        let dishList = JSON.parse(localStorage.getItem("dishData_sz")) || [];
+        let orderList = JSON.parse(localStorage.getItem("orderData_sz")) || [];
         let cartData = [];
 
         window.onload = function(){
-            try { emailjs.init(EMAILJS_USER_ID); } catch(e){}
+            emailjs.init(EMAILJS_USER_ID);
             refreshAllSelect();
             renderRestList();
-            renderDishList();
         }
 
         function loginShop(){
             let name = document.getElementById("shop-owner-name").value.trim();
             let mail = document.getElementById("owner-email").value.trim();
             if(!name || !mail){
-                alert("请先填好您的名字和接收邮件的QQ邮箱哦！");
+                alert("请先完整填写掌柜昵称和接收邮箱哦！");
                 return;
             }
             shopUser = {name, email: mail};
             document.getElementById("auth-section").classList.add("hidden");
             document.getElementById("shop-dashboard").classList.remove("hidden");
             document.getElementById("nav-user-info").classList.remove("hidden");
-            document.getElementById("display-current-user").innerText = "店主：" + name;
-            alert("登录成功！");
+            document.getElementById("display-current-user").innerText = "掌柜："+name;
+            alert("欢迎掌柜回宫！订单将实时发送至："+mail);
         }
-
-        function logout(){ location.reload(); }
+        function logout(){
+            location.reload();
+        }
 
         function switchModule(mod){
             ["restaurant","dish","cart","order"].forEach(m=>{
@@ -176,41 +201,53 @@
             if(mod=="order") renderOrderList();
         }
 
+        function switchDishMode(mode){
+            ["form-single","form-batch"].forEach(f => document.getElementById(f).classList.add("hidden"));
+            ["mode-single","mode-batch"].forEach(b => document.getElementById(b).className = "py-2 px-4 text-xs font-bold rounded-md text-slate-600");
+            document.getElementById("form-"+mode).classList.remove("hidden");
+            document.getElementById("mode-"+mode).className = "py-2 px-4 text-xs font-bold rounded-md bg-white text-blue-600 shadow-sm";
+        }
+
         function createRestaurant(){
             let rName = document.getElementById("rest-name").value.trim();
-            if(!rName){ alert("请输入餐厅名字！"); return; }
-            restList.push({ id: Date.now(), name: rName });
-            localStorage.setItem("restData", JSON.stringify(restList));
+            if(!rName){ alert("请输入御膳房名称"); return; }
+            let newRest = { id: Date.now(), name: rName };
+            restList.push(newRest);
+            localStorage.setItem("restData_sz", JSON.stringify(restList));
             document.getElementById("rest-name").value = "";
             renderRestList();
             refreshAllSelect();
-            alert("餐厅创建成功！");
+            alert("御膳房分店创建成功！");
         }
 
         function renderRestList(){
             let box = document.getElementById("rest-list");
-            if(restList.length==0){ box.innerHTML = "暂无餐厅"; return; }
+            if(restList.length == 0){
+                box.innerHTML = '<p class="text-xs text-slate-500">暂无主题，点击上方新建</p>';
+                return;
+            }
             let html = "";
             restList.forEach(r=>{
-                html += `<div class="bg-slate-50 p-3 rounded border flex justify-between items-center">
-                    <span class="font-bold">${r.name}</span>
-                    <button onclick="delRest(${r.id})" class="text-xs text-red-500 font-bold">删除</button>
+                html += `<div class="bg-slate-50 p-4 rounded-lg border flex justify-between items-center">
+                    <div><p class="font-bold text-sm">${r.name}</p></div>
+                    <button onclick="delRest(${r.id})" class="text-xs red-btn px-3 py-1">拆除主题</button>
                 </div>`;
             });
             box.innerHTML = html;
         }
 
         function delRest(id){
-            restList = restList.filter(item=>item.id != id);
-            localStorage.setItem("restData", JSON.stringify(restList));
+            restList = restList.filter(item => item.id != id);
+            localStorage.setItem("restData_sz", JSON.stringify(restList));
             renderRestList();
             refreshAllSelect();
         }
 
         function refreshAllSelect(){
-            let optHtml = "<option value=''>--请选择餐厅--</option>";
-            restList.forEach(r=>optHtml += `<option value="${r.id}">${r.name}</option>`);
+            let optHtml = "<option value=''>请选择御膳房主题</option>";
+            restList.forEach(r => optHtml += `<option value="${r.id}">${r.name}</option>`);
             document.getElementById("dish-rest-select").innerHTML = optHtml;
+            document.getElementById("batch-rest-select").innerHTML = optHtml;
             document.getElementById("cart-rest-select").innerHTML = optHtml;
         }
 
@@ -219,25 +256,40 @@
             let dName = document.getElementById("dish-name").value.trim();
             let dPrice = Number(document.getElementById("dish-price").value);
             let dDesc = document.getElementById("dish-desc").value.trim();
-            if(!rid || !dName || !dPrice){ alert("请完整选择餐厅、填写菜名和价格！"); return; }
+            if(!rid || !dName || !dPrice){ alert("请选择主题、填写完整菜名和价格！"); return; }
             dishList.push({ id: Date.now(), restId: rid, name: dName, price: dPrice, desc: dDesc });
-            localStorage.setItem("dishData", JSON.stringify(dishList));
+            localStorage.setItem("dishData_sz", JSON.stringify(dishList));
             document.getElementById("dish-name").value = "";
             document.getElementById("dish-price").value = "";
             document.getElementById("dish-desc").value = "";
             renderDishList();
-            alert("菜品添加成功！");
+            alert("皇家菜品添加成功！");
+        }
+
+        function batchAddDish(){
+            let rid = document.getElementById("batch-rest-select").value;
+            let text = document.getElementById("batch-text").value.trim();
+            if(!rid || !text){ alert("请选择主题并填写批量菜品内容！"); return; }
+            text.split("\n").forEach(line=>{
+                let arr = line.split(",");
+                if(arr.length >= 2){
+                    dishList.push({ id: Date.now()+Math.random(), restId: rid, name: arr[0].trim(), price: Number(arr[1]) || 0, desc: arr[2] ? arr[2].trim() : "" });
+                }
+            });
+            localStorage.setItem("dishData_sz", JSON.stringify(dishList));
+            document.getElementById("batch-text").value = "";
+            renderDishList();
+            alert("批量导入成功！");
         }
 
         function renderDishList(){
             let box = document.getElementById("dish-list");
-            if(dishList.length==0){ box.innerHTML = "暂无菜品"; return; }
+            if(dishList.length == 0){ box.innerHTML = "<p>暂无菜品</p>"; return; }
             let html = "";
             dishList.forEach(d=>{
-                let rObj = restList.find(r=>r.id==d.restId);
-                let rName = rObj ? rObj.name : "未知餐厅";
-                html += `<div class="bg-slate-50 p-2 rounded flex justify-between items-center my-1 border">
-                    <span>${d.name} （¥${d.price}） - [${rName}]</span>
+                let rName = restList.find(r => r.id == d.restId)?.name || "未知";
+                html += `<div class="bg-slate-50 p-2 rounded flex justify-between my-1 items-center">
+                    <span>${d.name} | ¥${d.price} | 主题：${rName}</span>
                     <button onclick="delDish(${d.id})" class="text-red-500 text-xs">删除</button>
                 </div>`;
             });
@@ -245,8 +297,8 @@
         }
 
         function delDish(id){
-            dishList = dishList.filter(d=>d.id!=id);
-            localStorage.setItem("dishData", JSON.stringify(dishList));
+            dishList = dishList.filter(d => d.id != id);
+            localStorage.setItem("dishData_sz", JSON.stringify(dishList));
             renderDishList();
         }
 
@@ -255,16 +307,18 @@
             let box = document.getElementById("cart-dish-box");
             cartData = [];
             refreshCart();
-            if(!rid){ box.innerHTML = "请先选择一家餐厅"; return; }
-            let curDishes = dishList.filter(d=>d.restId==rid);
-            if(curDishes.length==0){ box.innerHTML = "该餐厅还没有菜，快去“菜品编辑”添加吧！"; return; }
+            if(!rid){ box.innerHTML = '<p class="col-span-full text-slate-500">请先在上方的下拉框中选择御膳房主题</p>'; return; }
+            let curDishes = dishList.filter(d => d.restId == rid);
+            if(curDishes.length == 0){ box.innerHTML = '<p class="col-span-full text-slate-500">该主题下还没有菜品，请先去菜品管理添加</p>'; return; }
             let html = "";
             curDishes.forEach(d=>{
-                html += `<div class="exam-card p-3 space-y-1">
-                    <p class="font-bold text-sm">${d.name}</p>
-                    <p class="text-[11px] text-slate-500">${d.desc || '暂无介绍'}</p>
-                    <p class="text-blue-600 font-bold text-xs">¥${d.price}</p>
-                    <button onclick='addCart(${JSON.stringify(d})' class="mt-2 w-full py-1 primary-btn text-xs">加入购物车</button>
+                html += `<div class="exam-card p-3 flex flex-col justify-between">
+                    <div>
+                        <p class="font-bold text-sm">${d.name}</p>
+                        <p class="text-xs text-slate-500 mt-1">${d.desc}</p>
+                        <p class="text-blue-600 font-bold mt-2">¥${d.price}</p>
+                    </div>
+                    <button onclick='addCart(${JSON.stringify(d)})' class="mt-3 px-3 py-1.5 primary-btn text-xs">加入购物车</button>
                 </div>`;
             });
             box.innerHTML = html;
@@ -277,33 +331,32 @@
 
         function refreshCart(){
             let cartBox = document.getElementById("cart-list");
-            let total = 0;
-            let html = "";
-            cartData.forEach((item,idx)=>{
+            let total = 0, html = "";
+            cartData.forEach((item, idx)=>{
                 total += item.price;
-                html += `<div class="flex justify-between py-1 border-b">
-                    <span>${item.name} <strong>¥${item.price}</strong></span>
+                html += `<div class="flex justify-between py-1 border-b items-center">
+                    <span>${item.name} - ¥${item.price}</span>
                     <button onclick="removeCart(${idx})" class="text-red-500 text-xs">移除</button>
                 </div>`;
             });
-            cartBox.innerHTML = html || "购物车是空的";
+            cartBox.innerHTML = html || "购物车为空";
             document.getElementById("total-price").innerText = total;
         }
 
         function removeCart(idx){
-            cartData.splice(idx,1);
+            cartData.splice(idx, 1);
             refreshCart();
         }
 
         function submitOrder(){
-            if(cartData.length==0){ alert("购物车空空如也，不能下单哦！"); return; }
-            let rid = document.getElementById("cart-rest-select").value;
-            let rObj = restList.find(r=>r.id==rid);
-            let restName = rObj ? rObj.name : "私房餐厅";
-            let total = cartData.reduce((sum,item)=>sum+item.price, 0);
+            if(cartData.length == 0){ alert("购物车是空的，无法呈递圣旨！"); return; }
+            let total = cartData.reduce((sum, item) => sum + item.price, 0);
+            let restId = document.getElementById("cart-rest-select").value;
+            let restName = restList.find(r => r.id == restId).name;
 
-            let orderText = "";
-            cartData.forEach(d=> orderText += `- ${d.name} （¥${d.price}）\n`);
+            let orderText = "御膳房主题：" + restName + "\n";
+            cartData.forEach(d => orderText += `• ${d.name} （¥${d.price}）\n`);
+            orderText += "订单总计：¥" + total;
 
             let newOrder = {
                 id: Date.now(),
@@ -313,7 +366,7 @@
                 total: total
             };
             orderList.unshift(newOrder);
-            localStorage.setItem("orderData", JSON.stringify(orderList));
+            localStorage.setItem("orderData_sz", JSON.stringify(orderList));
 
             // 发送邮件参数
             let sendData = {
@@ -326,27 +379,27 @@
 
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, sendData)
             .then(()=>{
-                alert("下单成功！订单消息已经自动发到您的邮箱啦！");
+                alert("圣旨已呈递！订单通知已成功发送至您的邮箱，请查收！");
                 cartData = [];
                 refreshCart();
                 switchModule("order");
             })
             .catch(err=>{
-                alert("订单虽然在本地保存成功了，但邮件没发出去。请检查代码最上方的3个ID有没有填对！");
+                alert("订单已保存本地，但邮件发送失败。请检查 EmailJS 的密钥是否正确配置！");
                 console.log(err);
             });
         }
 
         function renderOrderList(){
             let box = document.getElementById("order-list");
-            if(orderList.length==0){ box.innerHTML = "暂无历史订单"; return; }
+            if(orderList.length == 0){ box.innerHTML = "<p>暂无圣旨记录</p>"; return; }
             let html = "";
             orderList.forEach(o=>{
-                let gStr = "";
-                o.goods.forEach(g=> gStr += `${g.name}(¥${g.price}) `);
-                html += `<div class="bg-slate-50 p-3 rounded border space-y-1">
-                    <p class="font-bold text-slate-800">${o.restName} — 下单时间：${o.time}</p>
-                    <p class="text-slate-600">菜品：${gStr}</p>
+                let goodsStr = "";
+                o.goods.forEach(g => goodsStr += `${g.name}(¥${g.price}) `);
+                html += `<div class="bg-slate-50 p-4 rounded-lg border space-y-1">
+                    <p class="font-bold text-slate-800">${o.restName} | 下单时间：${o.time}</p>
+                    <p class="text-xs text-slate-600">菜品：${goodsStr}</p>
                     <p class="text-emerald-600 font-bold">总计：¥${o.total}</p>
                 </div>`;
             });
